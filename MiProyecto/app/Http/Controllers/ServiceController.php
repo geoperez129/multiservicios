@@ -7,11 +7,12 @@ use App\Models\Service;
 
 class ServiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Obtener TODOS los servicios desde la base de datos
+        $plan = $request->query('plan'); // basico, estandar, premium (opcional)
+
         $services = Service::all();
 
-        return view('services.index', compact('services'));
+        return view('services.index', compact('services', 'plan'));
     }
 }
