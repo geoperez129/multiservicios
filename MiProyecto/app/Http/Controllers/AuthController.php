@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Service;
-use App\Models\Technician;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
-    /* ===============================
-        LOGIN
-    ================================ */
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN
+    |--------------------------------------------------------------------------
+    */
+
     public function loginView()
     {
         return view('auth.login');
@@ -22,29 +25,27 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required','email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            $user = Auth::user();
-
-            // 🔥 Redirección por rol
-            if ($user->role === 'technician') {
-                return redirect()->route('technician.profile');
-            }
-
-            return redirect()->route('user.profile');
+            return redirect()->intended(route('home'));
         }
 
-        return back()->with('error', 'Credenciales incorrectas');
+        return back()
+            ->withErrors(['email' => 'Las credenciales no coinciden.'])
+            ->withInput($request->only('email'));
     }
 
-    /* ===============================
-        REGISTRO USUARIO NORMAL
-    ================================ */
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTRO USUARIO NORMAL
+    |--------------------------------------------------------------------------
+    */
+
     public function registerView()
     {
         return view('auth.register');
@@ -52,119 +53,129 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
+        $data = $request->validate([
+            'name'                  => ['required', 'string', 'max:255'],
+            'email'                 => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'              => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'user',
+            'name'       => $data['name'],
+            'email'      => $data['email'],
+            'password'   => Hash::make($data['password']),
+            'role'       => 'user',       // 👈 usuario normal
+            'service_id' => null,         // por si existe la columna
         ]);
 
-        return redirect()->route('login')->with('success', 'Registro exitoso');
+        Auth::login($user);
+
+        return redirect()->route('home');
     }
 
-    /* ===============================
-        REGISTRO DE TÉCNICO
-    ================================ */
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTRO TÉCNICO
+    |--------------------------------------------------------------------------
+    */
+
+    // Vista de registro de técnico (llena el select con servicios)
     public function registerTechView()
     {
-        $services = Service::orderBy('name')->get();
+        $services = Service::all(); // SELECT * FROM services
 
         return view('auth.register_technician', compact('services'));
     }
 
+    // Guarda al técnico
     public function registerTechnician(Request $request)
     {
-        $request->validate([
-            'name'        => 'required|string|max:255',
-            'email'       => 'required|email|unique:users',
-            'service_id'  => 'required|exists:services,id',
-            'password'    => 'required|min:6|confirmed',
-            'photo'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+        $data = $request->validate([
+            'name'                  => ['required', 'string', 'max:255'],
+            'email'                 => ['required', 'email', 'max:255', 'unique:users,email'],
+            'service_id'            => ['required', 'exists:services,id'],
+            'password'              => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        // Crear usuario con rol technician
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'technician',
+            'name'       => $data['name'],
+            'email'      => $data['email'],
+            'password'   => Hash::make($data['password']),
+            'role'       => 'technician',      // 👈 rol técnico
+            'service_id' => $data['service_id'],
         ]);
 
-        /* =====================================
-            FOTO DE PERFIL
-        ====================================== */
-        $photoPath = null;
-
-        if ($request->hasFile('photo')) {
-            $filename = time().'_tech_'.$user->id.'.'.$request->photo->getClientOriginalExtension();
-            $request->photo->move(public_path('uploads/technicians'), $filename);
-            $photoPath = 'uploads/technicians/'.$filename;
-        }
-
-        /* =====================================
-            CREAR PERFIL DE TÉCNICO COMPLETO
-        ====================================== */
-        Technician::create([
-            'user_id'     => $user->id,
-            'service_id'  => $request->service_id,
-            'specialty'   => null,
-            'phone'       => null,
-            'city'        => null,
-            'description' => null,
-            'image'       => $photoPath,
-        ]);
-
-        /* =====================================
-            INICIAR SESIÓN AUTOMÁTICAMENTE
-        ====================================== */
         Auth::login($user);
 
-        return redirect()->route('technician.profile');
+        // Si ya tienes una vista de perfil técnico puedes redirigir ahí;
+        // si no, manda al home:
+        return redirect()->route('home');
+        // return redirect()->route('technician.profile');
     }
 
-    /* ===============================
-        PERFIL DE USUARIO NORMAL
-    ================================ */
+    /*
+    |--------------------------------------------------------------------------
+    | LOGOUT
+    |--------------------------------------------------------------------------
+    */
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PERFIL DE USUARIO NORMAL
+    |--------------------------------------------------------------------------
+    */
+
     public function userProfile()
     {
         $user = Auth::user();
-        return view('users.profile', compact('user'));
+
+        // Ajusta el nombre de la vista si la tuya se llama diferente:
+        // por ejemplo users/dashboard.blade.php
+        return view('users.dashboard', compact('user'));
     }
 
     public function editUser()
     {
         $user = Auth::user();
+
+        // Cambia "users.edit" al nombre real de tu vista de edición
         return view('users.edit', compact('user'));
     }
 
     public function updateUser(Request $request)
     {
-        $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . Auth::id(),
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'name'  => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = Auth::user();
-        $user->update($request->only('name', 'email'));
+        $user->name  = $data['name'];
+        $user->email = $data['email'];
+
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
 
         return redirect()->route('user.profile')
-                         ->with('success', 'Perfil actualizado correctamente.');
-    }
-
-    /* ===============================
-        LOGOUT
-    ================================ */
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect('/');
+            ->with('status', 'Perfil actualizado correctamente.');
     }
 }
