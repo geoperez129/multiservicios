@@ -1,5 +1,4 @@
-{{-- resources/views/pages/prices.blade.php --}}
-@extends('layouts.app') {{-- Cambia esto si tu layout se llama distinto --}}
+@extends('layouts.app')
 
 @section('title', 'Precios')
 
@@ -15,7 +14,6 @@
             <p class="card-text">
                 Servicio rápido y económico.
             </p>
-            {{-- Mandamos a /servicios con el plan en la cadena de consulta --}}
             <a href="{{ route('services.index', ['plan' => 'basico']) }}" class="btn btn-primary">
                 Contratar
             </a>
@@ -51,4 +49,3 @@
     </div>
 </div>
 @endsection
-
