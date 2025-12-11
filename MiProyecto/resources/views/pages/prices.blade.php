@@ -1,49 +1,54 @@
-@extends('layouts.app')
+{{-- resources/views/pages/prices.blade.php --}}
+@extends('layouts.app') {{-- Cambia esto si tu layout se llama distinto --}}
 
 @section('title', 'Precios')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center px-4 py-12">
-    <div class="max-w-4xl w-full text-white">
-        <h1 class="text-4xl font-extrabold mb-8">Precios</h1>
+<div class="container mt-5 mb-5" style="max-width: 900px; color: #ffffff;">
+    <h1 class="text-center mb-4">Precios</h1>
 
-        <div class="grid md:grid-cols-3 gap-8">
-            {{-- PLAN BÁSICO --}}
-            <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
-                <h2 class="text-2xl font-bold mb-2">Básico</h2>
-                <p class="text-3xl font-extrabold mb-2">$150</p>
-                <p class="mb-6">Servicio rápido y económico.</p>
+    {{-- PLAN BÁSICO --}}
+    <div class="card mb-3" style="background: rgba(0,0,0,0.6); border: 1px solid #444;">
+        <div class="card-body">
+            <h2 class="card-title">Básico</h2>
+            <h4 class="card-subtitle mb-2">$150</h4>
+            <p class="card-text">
+                Servicio rápido y económico.
+            </p>
+            {{-- Mandamos a /servicios con el plan en la cadena de consulta --}}
+            <a href="{{ route('services.index', ['plan' => 'basico']) }}" class="btn btn-primary">
+                Contratar
+            </a>
+        </div>
+    </div>
 
-                <a href="{{ route('services.index', ['plan' => 'basico']) }}"
-                   class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
-                    Contratar
-                </a>
-            </div>
+    {{-- PLAN ESTÁNDAR --}}
+    <div class="card mb-3" style="background: rgba(0,0,0,0.6); border: 1px solid #444;">
+        <div class="card-body">
+            <h2 class="card-title">Estándar</h2>
+            <h4 class="card-subtitle mb-2">$300</h4>
+            <p class="card-text">
+                Incluye inspección y diagnóstico.
+            </p>
+            <a href="{{ route('services.index', ['plan' => 'estandar']) }}" class="btn btn-primary">
+                Contratar
+            </a>
+        </div>
+    </div>
 
-            {{-- PLAN ESTÁNDAR --}}
-            <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
-                <h2 class="text-2xl font-bold mb-2">Estándar</h2>
-                <p class="text-3xl font-extrabold mb-2">$300</p>
-                <p class="mb-6">Incluye inspección y diagnóstico.</p>
-
-                <a href="{{ route('services.index', ['plan' => 'estandar']) }}"
-                   class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
-                    Contratar
-                </a>
-            </div>
-
-            {{-- PLAN PREMIUM --}}
-            <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
-                <h2 class="text-2xl font-bold mb-2">Premium</h2>
-                <p class="text-3xl font-extrabold mb-2">$500</p>
-                <p class="mb-6">Atención prioritaria y garantía extendida.</p>
-
-                <a href="{{ route('services.index', ['plan' => 'premium']) }}"
-                   class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
-                    Contratar
-                </a>
-            </div>
+    {{-- PLAN PREMIUM --}}
+    <div class="card mb-3" style="background: rgba(0,0,0,0.6); border: 1px solid #444;">
+        <div class="card-body">
+            <h2 class="card-title">Premium</h2>
+            <h4 class="card-subtitle mb-2">$500</h4>
+            <p class="card-text">
+                Atención prioritaria y garantía extendida.
+            </p>
+            <a href="{{ route('services.index', ['plan' => 'premium']) }}" class="btn btn-primary">
+                Contratar
+            </a>
         </div>
     </div>
 </div>
 @endsection
+
