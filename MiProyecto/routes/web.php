@@ -15,7 +15,8 @@
                     <p class="text-3xl font-extrabold mb-2">$150</p>
                     <p class="mb-6">Servicio rápido y económico.</p>
 
-                    <a href="{{ route('services.index', ['plan' => 'basico']) }}"
+                    {{-- Mandamos a /servicios con el plan en el query string --}}
+                    <a href="{{ url('/servicios?plan=basico') }}"
                        class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
                         Contratar
                     </a>
@@ -27,7 +28,7 @@
                     <p class="text-3xl font-extrabold mb-2">$300</p>
                     <p class="mb-6">Incluye inspección y diagnóstico.</p>
 
-                    <a href="{{ route('services.index', ['plan' => 'estandar']) }}"
+                    <a href="{{ url('/servicios?plan=estandar') }}"
                        class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
                         Contratar
                     </a>
@@ -39,7 +40,7 @@
                     <p class="text-3xl font-extrabold mb-2">$500</p>
                     <p class="mb-6">Atención prioritaria y garantía extendida.</p>
 
-                    <a href="{{ route('services.index', ['plan' => 'premium']) }}"
+                    <a href="{{ url('/servicios?plan=premium') }}"
                        class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
                         Contratar
                     </a>
@@ -48,3 +49,4 @@
         </div>
     </div>
 @endsection
+
