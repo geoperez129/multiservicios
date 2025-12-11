@@ -1,52 +1,65 @@
-{{-- resources/views/pages/prices.blade.php --}}
-@extends('layouts.app') {{-- Cambia esto si tu layout tiene otro nombre --}}
+<?php
 
-@section('title', 'Precios')
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\TechnicianController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\RatingController;
 
-@section('content')
-    <div class="min-h-screen flex items-center justify-center px-4 py-12">
-        <div class="max-w-4xl w-full text-white">
-            <h1 class="text-4xl font-extrabold mb-8">Precios</h1>
+/*
+|--------------------------------------------------------------------------
+| RUTAS PÚBLICAS
+|--------------------------------------------------------------------------
+*/
 
-            <div class="grid md:grid-cols-3 gap-8">
-                {{-- PLAN BÁSICO --}}
-                <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
-                    <h2 class="text-2xl font-bold mb-2">Básico</h2>
-                    <p class="text-3xl font-extrabold mb-2">$150</p>
-                    <p class="mb-6">Servicio rápido y económico.</p>
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-                    {{-- Mandamos a /servicios con el plan en el query string --}}
-                    <a href="{{ url('/servicios?plan=basico') }}"
-                       class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
-                        Contratar
-                    </a>
-                </div>
+/* LOGIN */
+Route::get('/login', [AuthController::class, 'loginView'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
-                {{-- PLAN ESTÁNDAR --}}
-                <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
-                    <h2 class="text-2xl font-bold mb-2">Estándar</h2>
-                    <p class="text-3xl font-extrabold mb-2">$300</p>
-                    <p class="mb-6">Incluye inspección y diagnóstico.</p>
+/* REGISTRO NORMAL */
+Route::get('/register', [AuthController::class, 'registerView'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 
-                    <a href="{{ url('/servicios?plan=estandar') }}"
-                       class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
-                        Contratar
-                    </a>
-                </div>
+/* REGISTRO TÉCNICO */
+Route::get('/register/technician', [AuthController::class, 'registerTechView'])->name('register.technician');
+Route::post('/register/technician', [AuthController::class, 'registerTechnician'])->name('register.technician.submit');
 
-                {{-- PLAN PREMIUM --}}
-                <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
-                    <h2 class="text-2xl font-bold mb-2">Premium</h2>
-                    <p class="text-3xl font-extrabold mb-2">$500</p>
-                    <p class="mb-6">Atención prioritaria y garantía extendida.</p>
+/* LOGOUT */
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-                    <a href="{{ url('/servicios?plan=premium') }}"
-                       class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
-                        Contratar
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
+/* SERVICIOS (LISTA) */
+Route::get('/servicios', [ServiceController::class, 'index'])->name('services.index');
 
+/* OTRAS PÁGINAS */
+Route::get('/acerca', [HomeController::class, 'about'])->name('about');
+Route::get('/precios', [HomeController::class, 'prices'])->name('prices');
+
+Route::get('/contactar-tecnico', [ContactController::class, 'form'])->name('contact.form');
+Route::post('/contactar-tecnico', [ContactController::class, 'send'])->name('contact.send');
+
+/*
+|--------------------------------------------------------------------------
+| RUTAS PROTEGIDAS
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    /* PERFIL USUARIO NORMAL */
+    Route::get('/perfil', [AuthController::class, 'userProfile'])->name('user.profile');
+    Route::get('/perfil/editar', [AuthController::class, 'editUser'])->name('user.edit');
+    Route::post('/perfil/actualizar', [AuthController::class, 'updateUser'])->name('user.update');
+
+    /* PERFIL TÉCNICO */
+    Route::get('/perfil-tecnico', [TechnicianController::class, 'showProfile'])->name('technician.profile');
+    Route::get('/perfil-tecnico/editar', [TechnicianController::class, 'editProfile'])->name('technician.profile.edit');
+    Route::post('/perfil-tecnico/actualizar', [TechnicianController::class, 'updateProfile'])->name('technician.profile.update');
+
+    /* CALIFICAR TÉCNICO */
+    Route::post('/tecnicos/{technician}/calificar', [RatingController::class, 'store'])
+        ->name('technicians.rate');
+});
