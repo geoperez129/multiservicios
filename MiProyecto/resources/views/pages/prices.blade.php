@@ -1,31 +1,51 @@
+{{-- AJUSTA este extends SOLO si tu layout se llama distinto --}}
 @extends('layouts.app')
 
+@section('title', 'Precios')
+
 @section('content')
-<div class="min-h-screen bg-gray-950 px-8 py-16 text-white">
-    <h1 class="text-5xl font-extrabold text-center mb-12">Precios</h1>
+    <div class="min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="max-w-4xl w-full text-white">
+            <h1 class="text-4xl font-extrabold mb-8">Precios</h1>
 
-    <div class="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-8">
+                {{-- PLAN BÁSICO --}}
+                <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
+                    <h2 class="text-2xl font-bold mb-2">Básico</h2>
+                    <p class="text-3xl font-extrabold mb-2">$150</p>
+                    <p class="mb-6">Servicio rápido y económico.</p>
 
-        @php
-            $plans = [
-                ['name' => 'Básico', 'price' => '$150', 'desc' => 'Servicio rápido y económico.'],
-                ['name' => 'Estándar', 'price' => '$300', 'desc' => 'Incluye inspección y diagnóstico.'],
-                ['name' => 'Premium', 'price' => '$500', 'desc' => 'Atención prioritaria y garantía extendida.'],
-            ];
-        @endphp
+                    {{-- Botón que lleva a la página de solicitar servicio --}}
+                    <a href="{{ url('/services?plan=basico') }}"
+                       class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
+                        Contratar
+                    </a>
+                </div>
 
-        @foreach ($plans as $p)
-            <div class="bg-gray-800/80 p-8 rounded-2xl shadow-xl hover:scale-105 transition">
-                <h2 class="text-3xl font-bold mb-3">{{ $p['name'] }}</h2>
-                <p class="text-4xl font-extrabold text-blue-400 mb-4">{{ $p['price'] }}</p>
-                <p class="text-blue-200 mb-6">{{ $p['desc'] }}</p>
+                {{-- PLAN ESTÁNDAR --}}
+                <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
+                    <h2 class="text-2xl font-bold mb-2">Estándar</h2>
+                    <p class="text-3xl font-extrabold mb-2">$300</p>
+                    <p class="mb-6">Incluye inspección y diagnóstico.</p>
 
-                <button class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold">
-                    Contratar
-                </button>
+                    <a href="{{ url('/services?plan=estandar') }}"
+                       class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
+                        Contratar
+                    </a>
+                </div>
+
+                {{-- PLAN PREMIUM --}}
+                <div class="bg-slate-900/70 rounded-xl p-6 shadow-lg border border-slate-700">
+                    <h2 class="text-2xl font-bold mb-2">Premium</h2>
+                    <p class="text-3xl font-extrabold mb-2">$500</p>
+                    <p class="mb-6">Atención prioritaria y garantía extendida.</p>
+
+                    <a href="{{ url('/services?plan=premium') }}"
+                       class="inline-block px-4 py-2 rounded-lg font-semibold bg-indigo-500 hover:bg-indigo-400 transition">
+                        Contratar
+                    </a>
+                </div>
             </div>
-        @endforeach
-
+        </div>
     </div>
-</div>
 @endsection
